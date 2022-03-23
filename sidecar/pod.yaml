@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar
+  labels:
+    name: sidecar
+spec:
+  containers:
+  - name: sidecar-container
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do echo echo $(date -u) 'Hi I am from Sidecar container 1' >> /var/log/index.html; sleep 5;done"]
+    resources: {}
+    volumeMounts:
+      - name: var-logs
+        mountPath: /var/log
+  - name: app-container
+    image: nginx
+    resources: {}
+    ports:
+      - containerPort: 80
+    volumeMounts:
+    - name: var-logs
+      mountPath: /usr/share/nginx/html
+  dnsPolicy: Default
+  volumes:
+    - name: var-logs
+      emptyDir: {}

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-webapp
+spec:
+  selector:
+    matchLabels:
+      app: nginx-webapp
+  template:
+    metadata:
+      labels:
+        app: nginx-webapp
+    spec:
+      containers:
+      - name: sidecar-container-1
+        image: busybox
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo echo $(date -u) 'Hi I am from Sidecar container 1' >> /var/log/index.html; sleep 5;done"]
+        resources: {}
+        volumeMounts:
+          - name: var-logs
+            mountPath: /var/log
+      - name: sidecar-container-2
+        image: busybox
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo echo $(date -u) 'Hi I am from Sidecar container 2' >> /var/log/index.html; sleep 5;done"]
+        resources: {}
+        volumeMounts:
+          - name: var-logs
+            mountPath: /var/log
+      - name: app-container
+        image: nginx
+        resources: {}
+        ports:
+          - containerPort: 80
+        volumeMounts:
+        - name: var-logs
+          mountPath: /usr/share/nginx/html
+      dnsPolicy: Default
+      volumes:
+        - name: var-logs
+          emptyDir: {}
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-webapp
+spec:
+  selector:
+    app: nginx-webapp
+  type: NodePort
+  ports:
+  - port: 80
+    nodePort: 30007
+    protocol: TCP
