@@ -1,0 +1,57 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: fast-logger
+  name: fast-logger
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fast-logger
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: fast-logger
+    spec:
+      containers:
+      - image: busybox
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo $(date -u)'#This is log' >> /var/log/file.log; sleep 5;done"]
+        name: main-container
+        resources: {}
+        volumeMounts:
+          - name: var-logs
+            mountPath: /var/log
+      - image: ishubhoshaha/adapter-fastapi
+        name: adapter-container
+        imagePullPolicy: Always
+        resources: {}
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+        - name: var-logs
+          mountPath: /var/log
+      dnsPolicy: Default
+      volumes:
+      - name: var-logs
+        emptyDir: {}
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: fast-logger-svc
+  labels:
+    run: fast-logger-svc
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+  selector:
+    app: fast-logger
+  type: NodePort
