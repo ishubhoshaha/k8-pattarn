@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mock-api
+  name: mock-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mock-api
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mock-api
+    spec:
+      containers:
+      - image: ishubhoshaha/fastmockapi
+        name: main-container
+        imagePullPolicy: Always
+        resources: {}
+        ports:
+          - containerPort: 8080
+      - image: ishubhoshaha/nginx-server-proxy
+        name: ambassador-container
+        imagePullPolicy: Always
+        resources: {}
+        ports:
+          - containerPort: 3000
+      dnsPolicy: Default
+status: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mock-api-service
+  labels:
+    run: mock-api-service
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+  selector:
+    app: mock-api
+  type: NodePort

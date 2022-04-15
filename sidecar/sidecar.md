@@ -7,6 +7,6 @@ Sidecar pattern extends and enhances the functionality of app/main containers wi
 - You can use this pattern for sending log events to the external server.
 - You can use this pattern for network-related tasks.
 
-## Gotchas
+## TL;DR
 - Sidecar containers run in parallel with the main container. So that you need to consider resource limits of sidecar containers while defining request/resource limits for the pod.
 - You should configure health checks for sidecar containers as main containers to make sure they are healthy.
